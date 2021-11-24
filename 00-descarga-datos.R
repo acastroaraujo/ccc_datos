@@ -159,7 +159,7 @@ sum(char_index)
 ## TO DO, RE-WRITE CCC_SENTENCIAS_CITADAS AND LOOK FOR EDGE CASES
 ## Move this to new script
 
-## Everything below this point needs to be re-done
+## Everything below this point needs to be re-done!!
 
 citations <- future_map(output, ccc::ccc_sentencias_citadas)
 names(citations) <- names(output)

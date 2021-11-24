@@ -75,6 +75,7 @@ metadata <- df |>
   )) |>
   ## fix missing years
   mutate(year = ifelse(is.na(year), extract_year(id), year)) |> 
+  mutate(year = as.integer(year)) |> 
   ## add missing spanish type
   mutate(tipo = tipo_lookup[type]) |>
   select(id, type, year, date, tipo, resumen, ponentes, salvamentos_y_aclaraciones_de_voto) |> 
@@ -97,7 +98,7 @@ metadata |>
   unnest(ponentes) |> 
   count(ponentes, sort = TRUE) 
 
-output |> 
+metadata |> 
   select(date) |> 
   drop_na() |> 
   mutate(day = lubridate::day(date),
@@ -107,28 +108,25 @@ output |>
   ggplot(aes(wday, n)) + 
   geom_col(width = 1/2) + 
   geom_text(aes(label = scales::comma(n), y = n + 250), family = "Crimson Text", size = 3) +
-  acathemes::theme_custom(base_family = "Crimson Text") + 
+  theme_custom(base_family = "Crimson Text") + 
   scale_y_continuous(labels = scales::comma) + 
   labs(x = "", y = "", title = "Sentencias de la Corte Constitucional", 
        subtitle = "por día de la semana", caption = "tipo: C, T, & SU")
 
-
-
-df |> 
+metadata |> 
   ggplot(aes(date)) + 
   geom_histogram(bins = 40, color = "white") +
-  acathemes::theme_custom(base_family = "Crimson Text") + 
+  theme_custom(base_family = "Crimson Text") + 
   labs(x = "") + 
   scale_x_date(date_breaks = "2 years", date_labels = "%Y")
 
-df |> 
-  mutate(type = str_extract(id, "^(C|SU|T|A)")) |> 
-  mutate(year = lubridate::year(date)) |> 
+metadata |> 
   count(year) |> 
   drop_na() |> 
   ggplot(aes(year, n)) + 
   geom_col() +
-  geom_text(aes(label = scales::comma(n, accuracy = 1), y = n + 50), family = "Crimson Text") 
+  geom_text(aes(label = scales::comma(n, accuracy = 1), y = n + 50), family = "Crimson Text") +
+  theme_custom(base_family = "Crimson Text")
   
 
 
