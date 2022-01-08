@@ -30,9 +30,9 @@ fs::dir_tree("data/")
 
 -   `seeds.rds` contains cases that show up in the old search engine when we search for "corte" (or *court*, in Spanish).
 
--   `seeds2.rds` file contains cases that show up in the new search engine when we search for "corte".
+-   `seeds2.rds` contains cases that show up in the new search engine when we search for "corte".
 
--   `metadata.rds` file contains all available case-level information.
+-   `metadata.rds` contains all available case-level information.
 
     ```{r}
     dplyr::glimpse(readr::read_rds("data/metadata.rds"))
@@ -40,7 +40,7 @@ fs::dir_tree("data/")
 
 <!-- -->
 
--   `citations.rds` file contains the edge list of citations.
+-   `citations.rds` contains the edge list of citations.
 
     ```{r}
     el <- readr::read_rds("data/citations.rds")
