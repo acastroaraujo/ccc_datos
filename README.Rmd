@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 # ccc_datos
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 This repository contains the scripts I used for scraping the Colombian Constitutional Court's website.
@@ -27,22 +28,33 @@ All relevant data will be contained in the `data/` directory.
 fs::dir_tree("data/")
 ```
 
-The `seeds.rds` file contains cases that show up in the old search engine when we search for "corte" (court, in Spanish).
+-   `seeds.rds` contains cases that show up in the old search engine when we search for "corte" (or *court*, in Spanish).
 
-The `seeds2.rds` file contains cases that show up in the new search engine when we search for "corte".
+-   `seeds2.rds` file contains cases that show up in the new search engine when we search for "corte".
 
-The `metadata.rds` file contains all case-level information.
+-   `metadata.rds` file contains all available case-level information.
 
-```{r}
-dplyr::glimpse(readr::read_rds("data/metadata.rds"))
-```
+    ```{r}
+    dplyr::glimpse(readr::read_rds("data/metadata.rds"))
+    ```
 
+<!-- -->
+
+-   `citations.rds` file contains the edge list of citations.
+
+    ```{r}
+    el <- readr::read_rds("data/citations.rds")
+    dplyr::glimpse(el)
+    ```
+
+    Note that some cases cite other cases multiple times.
+
+    ```{r}
+    dplyr::count(el, from, to, sort = TRUE) |> head(n = 10)
+    ```
+
+------------------------------------------------------------------------
 
 ```{r, echo=FALSE}
-knitr::include_graphics("asdf.png")
+knitr::include_graphics("weekly-cases.png")
 ```
-
-
-
-
-

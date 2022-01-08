@@ -43,7 +43,7 @@ names(output[error_index])
 
 #### Manual coding 
 
-output[["T-277-09"]] <- NA
+output[["T-277-09"]] <- NA # https://www.corteconstitucional.gov.co/relatoria/2009/T-277-09.htm
 
 # Export ------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ separate_names <- function(x) {
 }
 
 metadata <- df |> 
-  ## fix weird typo
+  ## fix this one weird typo
   mutate(ponentes = ifelse(
     test = ponentes == "Esteban Restrepo Saldarriaga (Conju",
     yes = "Esteban Restrepo Saldarriaga",
@@ -85,8 +85,9 @@ metadata <- df |>
     ponentes = separate_names(ponentes),
     salvamentos_y_aclaraciones_de_voto = separate_names(salvamentos_y_aclaraciones_de_voto)
   ) |> 
-  arrange(desc(date))
-
+  arrange(date) |>                      ## In case of duplicates, this keeps the one with the
+  distinct(id, type, .keep_all = TRUE)  ## earliest date. A handful of cases were uploaded to the
+                                        ## database twice on different dates.   
 
 glimpse(metadata)
 
@@ -111,22 +112,9 @@ metadata |>
   theme_custom(base_family = "Crimson Text") + 
   scale_y_continuous(labels = scales::comma) + 
   labs(x = "", y = "", title = "Sentencias de la Corte Constitucional", 
-       subtitle = "por día de la semana", caption = "tipo: C, T, & SU")
+       subtitle = "por día de la semana", caption = "tipos: C, T, SU")
 
-metadata |> 
-  ggplot(aes(date)) + 
-  geom_histogram(bins = 40, color = "white") +
-  theme_custom(base_family = "Crimson Text") + 
-  labs(x = "") + 
-  scale_x_date(date_breaks = "2 years", date_labels = "%Y")
+ggsave("weekly-cases.png", device = "png", dpi = "print", width = 7, height = 4)
 
-metadata |> 
-  count(year) |> 
-  drop_na() |> 
-  ggplot(aes(year, n)) + 
-  geom_col() +
-  geom_text(aes(label = scales::comma(n, accuracy = 1), y = n + 50), family = "Crimson Text") +
-  theme_custom(base_family = "Crimson Text")
-  
 
 
