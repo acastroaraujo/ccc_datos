@@ -62,18 +62,3 @@ new_search_engine <- function(keyword, year) {
 }
 
 
-
-# 
-# new_url <- "https://www.corteconstitucional.gov.co/Relatoria/buscador/ProvidenciaDetailt.php"
-# 
-# query$keyAnte <- 2
-# query$prov_id <- 23091
-# query$keyDesp <- 4
-# 
-# new_out <- httr::POST(new_url, body = query, encode = "multipart")
-# 
-# website2 <- content(new_out)
-# 
-# website2 |> html_nodes("div") |> html_text()
-# 
-# website2 |> html_text("div")

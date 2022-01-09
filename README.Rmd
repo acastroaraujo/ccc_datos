@@ -10,6 +10,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.align = "center"
 )
+
+library(tidyverse)
 ```
 
 # ccc_datos
@@ -35,22 +37,39 @@ fs::dir_tree("data/")
 -   `metadata.rds` contains all available case-level information.
 
     ```{r}
-    dplyr::glimpse(readr::read_rds("data/metadata.rds"))
+    glimpse(readr::read_rds("data/metadata.rds"))
     ```
-
-<!-- -->
 
 -   `citations.rds` contains the edge list of citations.
 
     ```{r}
-    el <- readr::read_rds("data/citations.rds")
-    dplyr::glimpse(el)
+    el <- read_rds("data/citations.rds")
+    glimpse(el)
     ```
 
     Note that some cases cite other cases multiple times.
 
     ```{r}
-    dplyr::count(el, from, to, sort = TRUE) |> head(n = 10)
+    count(el, from, to, sort = TRUE) |> head(n = 10)
+    ```
+
+-   `descriptors.rds` contains the edge list of citations-to-descriptors.
+
+    ```{r}
+    descriptors <- read_rds("data/descriptors.rds")
+    glimpse(descriptors)
+    ```
+
+    These can be used to find relevant "rights", "principles", and other relevant stuff.
+
+    ```{r}
+    descriptors |> 
+      filter(str_detect(to, "DERECHO")) |> 
+      count(to, sort = TRUE)
+
+    descriptors |> 
+      filter(str_detect(to, "PRINCIPIO")) |> 
+      count(to, sort = TRUE)
     ```
 
 ------------------------------------------------------------------------

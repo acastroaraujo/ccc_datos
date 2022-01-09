@@ -126,7 +126,7 @@ names(output[error_index])
 str_glue("{out_textos}{names(output[error_index])}.rds") |> file.remove()
 
 output <- dir(out_textos, full.names = TRUE) |> 
-  furrr::future_map(\(x) str_squish(read_rds(x)))
+  furrr::future_map(\(x) read_rds(x))
 
 names(output) <- dir(out_textos) |> str_remove("\\.rds")
 
@@ -150,4 +150,23 @@ sum(char_index)
 #   Sys.sleep(runif(1, 0, 2))
 # 
 # }
+
+
+# Check for bad quotation marks -------------------------------------------
+
+quotes_index <- future_map_lgl(output, str_detect, pattern = "\\u0093|\\u0094")
+sum(quotes_index)
+
+output[quotes_index] <- furrr::future_map(
+  output[quotes_index], str_replace_all, 
+  pattern = "\\u0093|\\u0094", replacement = '"'
+)
+
+
+for (i in seq_along(output[quotes_index])) {
+  
+  write_rds(output[quotes_index][[i]], str_glue("{out_textos}{names(output[quotes_index][i])}.rds"), compress = "gz")
+  
+}
+
 

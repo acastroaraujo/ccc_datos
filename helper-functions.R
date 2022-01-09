@@ -172,6 +172,47 @@ extract_cases <- function(texto) {
   c(out1, out2.1, out2.2, out3)
 }
 
+extract_descriptors <- function(texto) {
+  
+  regex <- "\\b[A-ZÁÉÍÓÚÜÑ\"]{2,}[A-ZÁÉÍÓÚÜÑ\", /]+?(?=-[A-Z])"
+  
+  if (str_detect(texto, "\\bReferencia:|\\bREFERENCIA:")) {
+    
+    out <- texto |>
+      stringr::str_extract(".+?(?=\\bReferencia:|\\bREFERENCIA:)") |> 
+      stringr::str_extract_all(regex) |> 
+      unlist() |> 
+      stringr::str_squish()
+    
+    return(out)
+    
+  }
+  
+  if (str_detect(texto, "\\bExpediente:|\\bEXPEDIENTE:")) {
 
-
+    out <- texto |>
+      stringr::str_extract(".+?(?=\\bExpediente:|\\bEXPEDIENTE:)") |> 
+      stringr::str_extract_all(regex) |> 
+      unlist() |> 
+      stringr::str_squish()
+    
+    return(out)
+    
+  }
+  
+  if (str_detect(texto, "Ref\\.?:|REF\\.?:")) {
+    
+    out <- texto |>
+      stringr::str_extract(".+?(?=\\bRef\\.?:|\\bREF\\.?:)") |> 
+      stringr::str_extract_all(regex) |> 
+      unlist() |> 
+      stringr::str_squish()
+    
+    return(out)
+    
+  }
+  
+  return(NULL)
+  
+}
 
