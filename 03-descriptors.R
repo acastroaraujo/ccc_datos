@@ -14,7 +14,6 @@ output <- dir(out_textos, full.names = TRUE) |>
 
 names(output) <- dir(out_textos) |> str_remove("\\.rds")
 
-
 # Descriptors -------------------------------------------------------------
 
 descriptors <- furrr::future_map(output, extract_descriptors) |> 
