@@ -170,3 +170,21 @@ for (i in seq_along(output[quotes_index])) {
 }
 
 
+# Check for other bad stuff -----------------------------------------------
+
+other_index <- future_map_lgl(output, str_detect, pattern = "\\u0096|\\u0097|\\u0092|\u0091")
+sum(other_index)
+
+output[other_index] <- furrr::future_map(
+  output[other_index], function(text) {
+    text |> 
+      str_replace_all(pattern = "\\u0092|\\u0091", replacement = "'") |> 
+      str_replace_all(pattern = "\\u0096|\\u0097", replacement = "-")
+  }
+)
+
+for (i in seq_along(output[other_index])) {
+  
+  write_rds(output[other_index][[i]], str_glue("{out_textos}{names(output[other_index][i])}.rds"), compress = "gz")
+  
+}
