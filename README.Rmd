@@ -20,7 +20,7 @@ library(tidyverse)
 
 <!-- badges: end -->
 
-This repository contains the scripts I used for scraping the Colombian Constitutional Court's website.
+This repository contains the scripts I used for scraping the Colombian Constitutional Court's [website](https://www.corteconstitucional.gov.co/).
 
 The `textos/` directory is not included in the repository. It has `r length(dir("textos/"))` documents.
 

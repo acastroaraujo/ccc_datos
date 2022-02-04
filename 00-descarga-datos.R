@@ -188,3 +188,6 @@ for (i in seq_along(output[other_index])) {
   write_rds(output[other_index][[i]], str_glue("{out_textos}{names(output[other_index][i])}.rds"), compress = "gz")
   
 }
+
+
+

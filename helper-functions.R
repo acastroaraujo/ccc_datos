@@ -130,7 +130,7 @@ extract_cases <- function(texto) {
   
   # This pattern is common in the footnotes, but it also captures the name of the document
   # Thus, remember to remove self-citations
-  regex2.1 <- "\\b(C|SU|T) ?(-| ) ?(\\d{3,4}A?)\\/(\\d{2})\\b"
+  regex2.1 <- "\\b(C|SU|T) ?(-| ) ?(\\d{3,4}A?)(?:\\/|-)(\\d{2})\\b"
   regex2.2 <- "\\b(C|SU|T) ?(-| ) ?(\\d{3,4}A?)\\/\\d{2}(\\d{2})\\b"
   
   ## This pattern tries to capture cases that are expressed in list-like fashion

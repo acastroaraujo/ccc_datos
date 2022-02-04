@@ -7,7 +7,8 @@
 <!-- badges: end -->
 
 This repository contains the scripts I used for scraping the Colombian
-Constitutional Court’s website.
+Constitutional Court’s
+[website](https://www.corteconstitucional.gov.co/).
 
 The `textos/` directory is not included in the repository. It has 26917
 documents.
@@ -53,7 +54,7 @@ fs::dir_tree("data/")
     ``` r
     el <- read_rds("data/citations.rds")
     glimpse(el)
-    #> Rows: 954,696
+    #> Rows: 965,341
     #> Columns: 6
     #> $ from      <chr> "C-001-18", "C-001-18", "C-001-18", "C-001-18", "C-001-18", …
     #> $ to        <chr> "C-458-15", "C-135-17", "C-042-17", "C-390-17", "C-1235-05",…
