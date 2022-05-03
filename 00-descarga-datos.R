@@ -13,7 +13,7 @@ if (!dir.exists(out_data)) dir.create(out_data)
 
 # Seeds -------------------------------------------------------------------
 
-# Checked on 2021-11-23: 36,537 cases
+# Checked on 2022-04-30: 37,477 cases
 
 # df <- map_df(0:360, ~ {
 #   Sys.sleep(runif(1))
@@ -59,6 +59,27 @@ if (!dir.exists(out_data)) dir.create(out_data)
 # 
 # write_rds(df, str_glue("{out_data}seeds2.rds"), compress = "gz")
 
+
+## this chunk used the new new engine, added on: 2022-05-02
+# df <- map_df(2020:2022, function(year) {
+# 
+#   message("Year: ", year)
+#   out <- new_search_engine("corte", year)
+#   Sys.sleep(runif(1, max = 5))
+# 
+#   return(out)
+# 
+# })
+# 
+# df <- df |>
+#   distinct() |>
+#   filter(str_detect(path, "\\.html?$")) |> 
+#   ## fix weird errors in the path
+#   mutate(path = str_replace_all(path, "(.*-)(\\d{2})([^\\d]+)(\\.html?)$", "\\1\\2\\4")) 
+# 
+# write_rds(df, str_glue("{out_data}seeds3.rds"), compress = "gz")
+
+
 # HTML scraper ------------------------------------------------------------
 
 seeds <- read_rds(str_glue("{out_data}seeds.rds")) |> 
@@ -70,7 +91,12 @@ seeds2 <- read_rds(str_glue("{out_data}seeds2.rds")) |>
   mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
   rename(sentencia = providencia)
 
-extra_cases <- setdiff(union(seeds2$sentencia, seeds$sentencia), intersect(seeds2$sentencia, seeds$sentencia))
+seeds3 <- read_rds(str_glue("{out_data}seeds3.rds")) |> 
+  filter(type %in% c("C", "T", "SU")) |> 
+  mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
+  rename(sentencia = providencia)
+
+extra_cases <- setdiff(union(seeds3$sentencia, seeds2$sentencia), intersect(seeds3$sentencia, seeds2$sentencia))
 
 ## There was a weird missing data issue for T cases in 2003
 extra_cases |> extract_year() |> table()
@@ -87,7 +113,8 @@ full_seeds <- full_join(
   ## Remove duplicate
   ## https://www.corteconstitucional.gov.co/Relatoria/2017/C-289-17.htm
   ## https://www.corteconstitucional.gov.co/Relatoria/2016/C-289-16.htm
-  filter(sentencia != "C-289-16")
+  filter(sentencia != "C-289-16") |> 
+  full_join(seeds3 |> select(sentencia, path))
 
 dict <- full_seeds |> select(sentencia, path) |> deframe()
 sentencias_done <- str_replace(dir(out_textos), ".rds", "")
@@ -122,7 +149,7 @@ error_index <- output |>
 length(error_index)
 names(output[error_index])
 
-# case "T-680-07" is weirdly not available
+# case "T-680-07" and "T-104-22" are weirdly not available
 str_glue("{out_textos}{names(output[error_index])}.rds") |> file.remove()
 
 output <- dir(out_textos, full.names = TRUE) |> 

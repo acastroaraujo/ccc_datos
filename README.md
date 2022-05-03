@@ -10,7 +10,7 @@ This repository contains the scripts I used for scraping the Colombian
 Constitutional Court’s
 [website](https://www.corteconstitucional.gov.co/).
 
-The `textos/` directory is not included in the repository. It has 26917
+The `textos/` directory is not included in the repository. It has 27139
 documents.
 
 All relevant data will be contained in the `data/` directory.
@@ -22,7 +22,8 @@ fs::dir_tree("data/")
 #> ├── descriptors.rds
 #> ├── metadata.rds
 #> ├── seeds.rds
-#> └── seeds2.rds
+#> ├── seeds2.rds
+#> └── seeds3.rds
 ```
 
 -   `seeds.rds` contains cases that show up in the [old search
@@ -31,13 +32,14 @@ fs::dir_tree("data/")
 
 -   `seeds2.rds` contains cases that show up in the [new search
     engine](https://www.corteconstitucional.gov.co/relatoria/buscador/)
-    when we search for “corte”.
+    when we search for “corte,” back in February of 2022. `seeds3.rds`
+    contains cases that show up more recently.
 
 -   `metadata.rds` contains all available case-level information.
 
     ``` r
     glimpse(readr::read_rds("data/metadata.rds"))
-    #> Rows: 26,918
+    #> Rows: 27,141
     #> Columns: 8
     #> $ id                                 <chr> "T-012-92", "T-001-92", "C-004-92",…
     #> $ type                               <chr> "T", "T", "C", "T", "T", "C", "T", …
@@ -54,7 +56,7 @@ fs::dir_tree("data/")
     ``` r
     el <- read_rds("data/citations.rds")
     glimpse(el)
-    #> Rows: 965,341
+    #> Rows: 986,181
     #> Columns: 6
     #> $ from      <chr> "C-001-18", "C-001-18", "C-001-18", "C-001-18", "C-001-18", …
     #> $ to        <chr> "C-458-15", "C-135-17", "C-042-17", "C-390-17", "C-1235-05",…

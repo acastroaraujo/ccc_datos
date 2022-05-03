@@ -13,8 +13,18 @@ seeds2 <- read_rds(str_glue("{out_data}seeds2.rds")) %>%
   mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
   rename(sentencia = providencia)
 
+seeds3 <- read_rds(str_glue("{out_data}seeds3.rds")) %>% 
+  filter(type %in% c("C", "T", "SU")) |> 
+  mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
+  rename(sentencia = providencia, ponentes = magistrados_ponentes, t_providencia = tipo)
+
 df1 <- seeds2 |> 
   select(c("id" = "sentencia", "date" = "f_sentencia"), everything())
+
+df2 <- seeds3 |> 
+  select(c("id" = "sentencia", "date" = "f_sentencia"), everything())
+
+df1 <- full_join(df1, df2)
 
 # Fechas ------------------------------------------------------------------
 

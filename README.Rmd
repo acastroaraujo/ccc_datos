@@ -32,7 +32,7 @@ fs::dir_tree("data/")
 
 -   `seeds.rds` contains cases that show up in the [old search engine](https://www.corteconstitucional.gov.co/relatoria/) when we search for "corte" (or *court*, in Spanish).
 
--   `seeds2.rds` contains cases that show up in the [new search engine](https://www.corteconstitucional.gov.co/relatoria/buscador/) when we search for "corte".
+-   `seeds2.rds` contains cases that show up in the [new search engine](https://www.corteconstitucional.gov.co/relatoria/buscador/) when we search for "corte," back in February of 2022. `seeds3.rds` contains cases that show up more recently.
 
 -   `metadata.rds` contains all available case-level information.
 
