@@ -70,13 +70,13 @@ new_search_engine <- function(keyword, year) {
   
   query <- list(
     searchOption = "texto", 
-    fechainicial = paste0(year, "-01-01"), 
-    fechafinal = paste0(year, "-12-31"), 
+    finicio = paste0(year, "-01-01"), 
+    ffin = paste0(year, "-12-31"), 
     buscar_por = keyword,
     accion = "search",
     OrderbyOption = "des__score",
-    cant_providencias = "10000",
-    accion = "generar_excel"
+    cant_providencias = "10000"
+    #accion = "generar_excel"
   )
   
   query <- paste(paste(names(query), query, sep = "="), collapse = "&")
@@ -85,9 +85,10 @@ new_search_engine <- function(keyword, year) {
   website <- rvest::session(paste(url, query, sep = "?"))
   stopifnot(httr::status_code(website) == 200)
   
+
   out <- website |> 
     rvest::html_form() |> 
-    purrr::pluck(1) |> 
+    purrr::pluck(3) |> ## antes era 1
     rvest::html_form_submit(submit = "bto_show_expedientes")
   
   stopifnot(httr::status_code(out) == 200)

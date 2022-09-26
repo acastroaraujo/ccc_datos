@@ -54,6 +54,8 @@ names(output[error_index])
 #### Manual coding 
 
 output[["T-277-09"]] <- NA # https://www.corteconstitucional.gov.co/relatoria/2009/T-277-09.htm
+output[["T-089-22"]] <- NA
+file.remove("textos/T-089-22.rds")
 
 # Export ------------------------------------------------------------------
 

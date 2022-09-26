@@ -61,23 +61,23 @@ if (!dir.exists(out_data)) dir.create(out_data)
 
 
 ## this chunk used the new new engine, added on: 2022-05-02
-# df <- map_df(2020:2022, function(year) {
+df <- map_df(2020:2022, function(year) {
+
+  message("Year: ", year)
+  out <- new_search_engine("corte", year)
+  Sys.sleep(runif(1, max = 5))
+
+  return(out)
+
+})
+
+df <- df |>
+  distinct() |>
+  filter(str_detect(path, "\\.html?$")) |> 
+  ## fix weird errors in the path
+  mutate(path = str_replace_all(path, "(.*-)(\\d{2})([^\\d]+)(\\.html?)$", "\\1\\2\\4")) 
 # 
-#   message("Year: ", year)
-#   out <- new_search_engine("corte", year)
-#   Sys.sleep(runif(1, max = 5))
-# 
-#   return(out)
-# 
-# })
-# 
-# df <- df |>
-#   distinct() |>
-#   filter(str_detect(path, "\\.html?$")) |> 
-#   ## fix weird errors in the path
-#   mutate(path = str_replace_all(path, "(.*-)(\\d{2})([^\\d]+)(\\.html?)$", "\\1\\2\\4")) 
-# 
-# write_rds(df, str_glue("{out_data}seeds3.rds"), compress = "gz")
+write_rds(df, str_glue("{out_data}seeds3.rds"), compress = "gz")
 
 
 # HTML scraper ------------------------------------------------------------
@@ -149,7 +149,7 @@ error_index <- output |>
 length(error_index)
 names(output[error_index])
 
-# case "T-680-07" and "T-104-22" are weirdly not available
+# case "T-680-07", "T-322-20", and "T-104-22" are weirdly not available
 str_glue("{out_textos}{names(output[error_index])}.rds") |> file.remove()
 
 output <- dir(out_textos, full.names = TRUE) |> 
