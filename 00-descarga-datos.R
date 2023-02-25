@@ -60,25 +60,38 @@ if (!dir.exists(out_data)) dir.create(out_data)
 # write_rds(df, str_glue("{out_data}seeds2.rds"), compress = "gz")
 
 
-## this chunk used the new new engine, added on: 2022-05-02
-df <- map_df(2020:2022, function(year) {
-
-  message("Year: ", year)
-  out <- new_search_engine("corte", year)
-  Sys.sleep(runif(1, max = 5))
-
-  return(out)
-
-})
-
-df <- df |>
-  distinct() |>
-  filter(str_detect(path, "\\.html?$")) |> 
-  ## fix weird errors in the path
-  mutate(path = str_replace_all(path, "(.*-)(\\d{2})([^\\d]+)(\\.html?)$", "\\1\\2\\4")) 
+## this chunk used the new new engine, updated on: 2023-02-24
+# df <- map_df(2020:2023, function(year) {
 # 
-write_rds(df, str_glue("{out_data}seeds3.rds"), compress = "gz")
+#   message("Year: ", year)
+#   out <- new_search_engine("corte", year)
+#   Sys.sleep(runif(1, max = 5))
+# 
+#   return(out)
+# 
+# })
+# 
+# df <- df |>
+#   distinct() |>
+#   filter(str_detect(path, "\\.html?$")) |> 
+#   ## fix weird errors in the path
+#   mutate(path = str_replace_all(path, "(.*-)(\\d{2})([^\\d]+)(\\.html?)$", "\\1\\2\\4")) 
+# # 
+# write_rds(df, str_glue("{out_data}seeds3.rds"), compress = "gz")
 
+## The metadata fields were significantly updated sometime recently, so I decided to download all of them again.
+
+# df <- map_df(1992:2023, function(year) {
+# 
+#   message("Year: ", year)
+#   out <- new_search_engine(keyword = "", year)
+#   Sys.sleep(runif(1, max = 2))
+# 
+#   return(out)
+# 
+# })
+# 
+# write_rds(df, str_glue("{out_data}raw_metadata.rds"), compress = "gz")
 
 # HTML scraper ------------------------------------------------------------
 
@@ -96,11 +109,10 @@ seeds3 <- read_rds(str_glue("{out_data}seeds3.rds")) |>
   mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
   rename(sentencia = providencia)
 
-extra_cases <- setdiff(union(seeds3$sentencia, seeds2$sentencia), intersect(seeds3$sentencia, seeds2$sentencia))
-
-## There was a weird missing data issue for T cases in 2003
-extra_cases |> extract_year() |> table()
-
+seeds4 <- read_rds(str_glue("{out_data}raw_metadata.rds")) |> 
+  filter(type %in% c("C", "T", "SU")) |> 
+  mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
+  rename(sentencia = providencia)
 
 full_seeds <- full_join(
   seeds |> select(sentencia, path),
@@ -114,7 +126,10 @@ full_seeds <- full_join(
   ## https://www.corteconstitucional.gov.co/Relatoria/2017/C-289-17.htm
   ## https://www.corteconstitucional.gov.co/Relatoria/2016/C-289-16.htm
   filter(sentencia != "C-289-16") |> 
-  full_join(seeds3 |> select(sentencia, path))
+  full_join(seeds3 |> select(sentencia, path)) |> 
+  distinct() |> 
+  full_join(seeds4 |> select(sentencia, path)) |> 
+  distinct()
 
 dict <- full_seeds |> select(sentencia, path) |> deframe()
 sentencias_done <- str_replace(dir(out_textos), ".rds", "")
@@ -215,6 +230,18 @@ for (i in seq_along(output[other_index])) {
   write_rds(output[other_index][[i]], str_glue("{out_textos}{names(output[other_index][i])}.rds"), compress = "gz")
   
 }
+
+## do better
+
+output <- furrr::future_map(output, \(x) stringi::stri_enc_toutf8(x))
+
+
+for (i in seq_along(output)) {
+  
+  write_rds(output[[i]], str_glue("{out_textos}{names(output[i])}.rds"), compress = "gz")
+  
+}
+
 
 
 

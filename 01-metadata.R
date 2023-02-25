@@ -1,4 +1,6 @@
 
+## one day I'll be able to rely entirely on raw_metadata
+
 library(tidyverse)
 library(progress)
 library(furrr)
@@ -11,95 +13,58 @@ out_data <- "data/"
 seeds2 <- read_rds(str_glue("{out_data}seeds2.rds")) %>% 
   filter(type %in% c("C", "T", "SU")) |> 
   mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
-  rename(sentencia = providencia)
+  select(id = providencia, ponentes, date = f_sentencia, year, type) |> 
+  mutate(ponentes = stringi::stri_trans_general(ponentes, "Latin-ASCII")) 
 
-seeds3 <- read_rds(str_glue("{out_data}seeds3.rds")) %>% 
+i_2 <- unique(seeds2$id)
+
+raw_metadata <- read_rds(str_glue("{out_data}raw_metadata.rds")) |> 
   filter(type %in% c("C", "T", "SU")) |> 
-  mutate(providencia = str_replace(providencia, "SU|su|Su", "SU")) |> 
-  rename(sentencia = providencia, ponentes = magistrados_ponentes, t_providencia = tipo)
+  select(id = providencia, ponentes = magistrados, date = f_sentencia, year, type) |> 
+  mutate(id = str_replace(id, "SU|su|Su", "SU")) |> 
+  mutate(ponentes = stringi::stri_trans_general(ponentes, "Latin-ASCII")) 
 
-df1 <- seeds2 |> 
-  select(c("id" = "sentencia", "date" = "f_sentencia"), everything())
+i_raw <- unique(raw_metadata$id)
 
-df2 <- seeds3 |> 
-  select(c("id" = "sentencia", "date" = "f_sentencia"), everything())
+setdiff(i_2, i_raw)
 
-df1 <- full_join(df1, df2)
+seeds2 <- seeds2 |> 
+  filter(id %in% setdiff(i_2, i_raw)) |> 
+  mutate(ponentes = ifelse(
+    test = ponentes == "Gloria Stella Ortiz DelgadoCristina Pardo Schlesinger",
+    yes = "Gloria Stella Ortiz Delgado\r\nCristina Pardo Schlesinger",
+    no = ponentes
+    )
+  )
 
-# Fechas ------------------------------------------------------------------
+df <- full_join(seeds2, raw_metadata) 
 
-cases <- str_replace(dir(out_textos), ".rds", "")
-cases <- setdiff(cases, df1$id)
-pb <- progress_bar$new(format = "[:bar] :current/:total (:percent)", total = length(cases))
-
-output <- map(cases, function(x) {
-  
-  texto <- str_squish(read_rds(paste0(out_textos, x, ".rds")))
-  out <- try(extract_full_date(x, texto))
-  names(out) <- x
-  return(out)
-  
-})
-
-names(output) <- cases
-
-error_index <- output %>% 
-  map_lgl(~ any(class(.x) == "try-error")) %>% 
-  which()
-
-length(output[error_index])
-
-names(output[error_index])
-
-#### Manual coding 
-
-output[["T-277-09"]] <- NA # https://www.corteconstitucional.gov.co/relatoria/2009/T-277-09.htm
-output[["T-089-22"]] <- NA
-file.remove("textos/T-089-22.rds")
-
-# Export ------------------------------------------------------------------
-
-df2 <- enframe(output, name = "id", value = "date") |> 
-  unnest(cols = "date") |> 
-  mutate(year = lubridate::year(date)) |> 
-  mutate(across(everything(), unname)) |> 
-  mutate(type = str_extract(id, "^(C|SU|T|A)")) 
-
-df <- full_join(df1, df2)
 
 ## Finish cleaning
 
 tipo_lookup <- c("T" = "Tutela", "SU" = "Sentencia de unificación", "C" = "Constitucionalidad")
 
 separate_names <- function(x) {
-  x |> 
-    str_remove_all("\\([A-Za-z ]+\\)") |> 
-    str_replace_all("([:lower:])([:upper:])", "\\1_\\2") |> 
-    str_split("_") 
+  str_split(tolower(x), "\r\n") 
 }
 
 metadata <- df |> 
-  ## fix this one weird typo
-  mutate(ponentes = ifelse(
-    test = ponentes == "Esteban Restrepo Saldarriaga (Conju",
-    yes = "Esteban Restrepo Saldarriaga",
-    no = ponentes
-  )) |>
-  ## fix missing years
-  mutate(year = ifelse(is.na(year), extract_year(id), year)) |> 
-  mutate(year = as.integer(year)) |> 
   ## add missing spanish type
-  mutate(tipo = tipo_lookup[type]) |>
-  select(id, type, year, date, tipo, resumen, ponentes, salvamentos_y_aclaraciones_de_voto) |> 
+  mutate(tipo = unname(tipo_lookup[type])) |> 
   ## clarify NAs
-  mutate(across(where(is.character), \(x) ifelse(x == "Sin Información", NA_character_, x))) |> 
-  mutate(
-    ponentes = separate_names(ponentes),
-    salvamentos_y_aclaraciones_de_voto = separate_names(salvamentos_y_aclaraciones_de_voto)
-  ) |> 
+  mutate(across(where(is.character), \(x) ifelse(x == "Sin Informacion", NA_character_, x))) |> 
   arrange(date) |>                      ## In case of duplicates, this keeps the one with the
   distinct(id, type, .keep_all = TRUE)  ## earliest date. A handful of cases were uploaded to the
-                                        ## database twice on different dates.   
+                                        ## database twice on different dates.
+
+metadata[metadata$id == "T-015-92", ]$ponentes <- "Fabio Moron Diaz"
+metadata[metadata$id == "T-225-92", ]$ponentes <- "Jaime Sanin Greiffenstein"
+
+metadata <- metadata |> 
+  mutate(ponentes = tolower(ponentes)) |> 
+  mutate(ponentes = str_remove_all(ponentes, "\\(conjuez\\)")) |> 
+  mutate(ponentes = str_split(ponentes, "\r\n")) |> 
+  mutate(ponentes = map(ponentes, str_squish)) 
 
 glimpse(metadata)
 

@@ -30,11 +30,10 @@ edge_list <- input_el |>
   ) |>
   filter(
     ## this line corrects some typos due (mostly) to problems 
-    ## with the documents, not the regular expressions
-    to_year %in% 1991:2021
+    ## with the documents, NOT the regular expressions
+    to_year %in% 1992:2023
   ) |> 
-  filter(to_year <= from_year) |> ## remove blatant typos
-  filter(from != to) |>           ## remove self-citation
+  filter(from != to) |>            ## remove self-citation
   filter(to %in% names(citations)) 
 
 cat("weighted network:", scales::comma(nrow(edge_list)))
@@ -47,10 +46,11 @@ metadata <- read_rds(str_glue("{out_data}metadata.rds")) |>
   drop_na()
 
 edge_list <- edge_list |> 
-  left_join(metadata, by = c("from" = "id")) |>
+  left_join(metadata, by = c("from" = "id")) |> 
   rename(from_date = date) |> 
   left_join(metadata, by = c("to" = "id")) |> 
   rename(to_date = date) 
+
 
 # export ------------------------------------------------------------------
 

@@ -80,29 +80,33 @@ new_search_engine <- function(keyword, year) {
   )
   
   query <- paste(paste(names(query), query, sep = "="), collapse = "&")
-  #out <- httr::RETRY("GET", url, body = query)
   
   website <- rvest::session(paste(url, query, sep = "?"))
   stopifnot(httr::status_code(website) == 200)
   
-
   out <- website |> 
     rvest::html_form() |> 
-    purrr::pluck(3) |> ## antes era 1
+    purrr::pluck(3) |> 
     rvest::html_form_submit(submit = "bto_show_expedientes")
   
   stopifnot(httr::status_code(out) == 200)
   
   links <- read_html(out) |> 
-    html_elements("a") |> 
-    html_attr("href")
+    rvest::html_elements("table tr") |> 
+    utils::tail(-1) |> ## remove header
+    purrr::map_chr(function(x) {
+      x |> ## Extract the first link of each row
+        rvest::html_elements("a") |> 
+        rvest::html_attr("href") |> 
+        purrr::pluck(1)
+    })
   
   df <- out |> 
     rvest::read_html() |> 
     rvest::html_table() |>
     purrr::pluck(1) |> 
     janitor::clean_names() |>
-    dplyr::select(-c(1:2)) |> 
+    dplyr::select(-"number", -"relevancia") |> 
     ## removes white spaces
     dplyr::mutate(providencia = stringr::str_replace_all(providencia, "[:space:]", "")) |> 
     ## removes any character at the end that's NOT a number
