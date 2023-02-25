@@ -54,7 +54,15 @@ edge_list <- edge_list |>
 
 # export ------------------------------------------------------------------
 
+
+edge_list <- edge_list |> 
+  count(from, to, from_year, to_year, from_date, to_date, name = "weight")
+
 write_rds(edge_list, str_glue("{out_data}citations.rds"), compress = "gz")
+
+
+
+
 
 # comparing different citation extractions --------------------------------
 
